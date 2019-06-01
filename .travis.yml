@@ -1,5 +1,2 @@
 language: swift
-os: 
-- osx
-- linux
-osx_image: xcode10.2
+os: linux
