@@ -127,7 +127,7 @@ import Darwin
 ///
 /// IMPORTANT: Some of the values in the following table are not valid for all computers. Check your computer's documentation for values that are different.
 ///
-enum EscapeSequence: CustomStringConvertible {
+public enum EscapeSequence: CustomStringConvertible {
     case setCursor(Int, Int)
     case cursorUp(Int)
     case cursorDown(Int)
@@ -142,7 +142,7 @@ enum EscapeSequence: CustomStringConvertible {
     case resetMode(Int)
     case setKeyboardString([(Int, String)])
 
-    var description: String {
+    public var description: String {
         switch self {
         case let .setCursor(line, col):
             return "\u{1b}[\(line);\(col)H"
@@ -174,19 +174,19 @@ enum EscapeSequence: CustomStringConvertible {
     }
 }
 
-struct Termbo {
+public struct Termbo {
     private let width: Int
     private let height: Int
 
     private var renderedHeightSaved: Int = 0
     private var renderedHeight: Int = 0
 
-    init(width: Int, height: Int) {
+    public init(width: Int, height: Int) {
         self.width = width
         self.height = height
     }
 
-    mutating func rendered(bitmap: [String]) -> String {
+    public mutating func rendered(bitmap: [String]) -> String {
         var result = ""
         for (i, row) in bitmap.enumerated() {
             if i >= height { break }
@@ -200,15 +200,21 @@ struct Termbo {
         return result
     }
 
-    mutating func render(bitmap: [String], to _: UnsafeMutablePointer<FILE>) {
+    public mutating func render(bitmap: [String], to _: UnsafeMutablePointer<FILE>) {
         let renderedString = rendered(bitmap: bitmap)
         fwrite(renderedString, 1, renderedString.count, stdout)
         fflush(stdout)
     }
     
-    mutating func clear(_ output: UnsafeMutablePointer<FILE>) {
+    public mutating func clear(_ output: UnsafeMutablePointer<FILE>) {
         let emptyFilling = [String](repeating: String(repeating: " ", count: self.width), count: self.height)
         render(bitmap: emptyFilling, to: output)
+    }
+    
+    public mutating func end() {
+        let down = EscapeSequence.cursorDown(renderedHeightSaved).description
+        fwrite(down, 1, down.count, stdout)
+        fflush(stdout)
     }
 
     private mutating func restoreCursor() -> String {
@@ -226,9 +232,4 @@ struct Termbo {
         renderedHeight = 0
     }
 
-    mutating func end() {
-        let down = EscapeSequence.cursorDown(renderedHeightSaved).description
-        fwrite(down, 1, down.count, stdout)
-        fflush(stdout)
-    }
 }
