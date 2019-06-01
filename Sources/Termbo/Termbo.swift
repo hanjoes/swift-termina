@@ -141,7 +141,7 @@ enum EscapeSequence: CustomStringConvertible {
     case setMode(Int)
     case resetMode(Int)
     case setKeyboardString([(Int, String)])
-    
+
     var description: String {
         switch self {
         case let .setCursor(line, col):
@@ -169,52 +169,46 @@ enum EscapeSequence: CustomStringConvertible {
         case let .resetMode(value):
             return "\u{1b}[=\(value)l"
         case let .setKeyboardString(mappings):
-            return "\u{1b}[\(mappings.map {"\($0.0);\($0.1)"}.joined(separator: ";"))p"
+            return "\u{1b}[\(mappings.map { "\($0.0);\($0.1)" }.joined(separator: ";"))p"
         }
     }
 }
 
 struct Termbo {
-    
     private let width: Int
     private let height: Int
-    
+
     private var renderedHeightSaved: Int = 0
     private var renderedHeight: Int = 0
-    
+
     init(width: Int, height: Int) {
         self.width = width
         self.height = height
     }
-    
+
     mutating func render(bitmap: [String]) {
-//        let save = EscapeSequence.saveCursor.description
-//        let restore = EscapeSequence.restoreCursor.description
-//        fwrite(save, 1, save.count, stdout)
-//        fflush(stdout)
         for (i, row) in bitmap.enumerated() {
-            if i >= self.height { break }
-            self.renderedHeight += 1
-            let offset = row.count > self.width ? self.width - 1 : row.count
+            if i >= height { break }
+            renderedHeight += 1
+            let offset = row.count > width ? width - 1 : row.count
             let endIndex = row.index(row.startIndex, offsetBy: offset)
-            let printedRow = String(row[row.startIndex..<endIndex])
+            let printedRow = String(row[row.startIndex ..< endIndex])
             fwrite(printedRow, 1, printedRow.count, stdout)
             fwrite("\n", 1, 2, stdout)
         }
-//        fwrite(restore, 1, restore.count, stdout)
         restoreCursor()
         fflush(stdout)
     }
-    
-    mutating private func restoreCursor() {
-        self.renderedHeightSaved = self.renderedHeight
-        let up = EscapeSequence.cursorUp(self.renderedHeight).description
+
+    private mutating func restoreCursor() {
+        renderedHeightSaved = renderedHeight
+        let up = EscapeSequence.cursorUp(renderedHeight).description
         fwrite(up, 1, up.count, stdout)
-        self.renderedHeight = 0
+        renderedHeight = 0
     }
-    
+
     mutating func end() {
-        let down = EscapeSequence.cursorDown(self.renderedHeightSaved).description
+        let down = EscapeSequence.cursorDown(renderedHeightSaved).description
         fwrite(down, 1, down.count, stdout)
         fflush(stdout)
     }

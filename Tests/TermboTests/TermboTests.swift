@@ -1,5 +1,5 @@
-import XCTest
 @testable import Termbo
+import XCTest
 
 final class TermboTests: XCTestCase {
     func testExample() {
@@ -17,7 +17,6 @@ final class TermboTests: XCTestCase {
         }
         t.end()
     }
-    
 
     static var allTests = [
         ("testExample", testExample),
