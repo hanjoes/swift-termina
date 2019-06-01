@@ -1,3 +1,4 @@
+import Darwin
 
 /// Escape Sequences
 ///
@@ -174,4 +175,47 @@ enum EscapeSequence: CustomStringConvertible {
 }
 
 struct Termbo {
+    
+    private let width: Int
+    private let height: Int
+    
+    private var renderedHeightSaved: Int = 0
+    private var renderedHeight: Int = 0
+    
+    init(width: Int, height: Int) {
+        self.width = width
+        self.height = height
+    }
+    
+    mutating func render(bitmap: [String]) {
+//        let save = EscapeSequence.saveCursor.description
+//        let restore = EscapeSequence.restoreCursor.description
+//        fwrite(save, 1, save.count, stdout)
+//        fflush(stdout)
+        for (i, row) in bitmap.enumerated() {
+            if i >= self.height { break }
+            self.renderedHeight += 1
+            let offset = row.count > self.width ? self.width - 1 : row.count
+            let endIndex = row.index(row.startIndex, offsetBy: offset)
+            let printedRow = String(row[row.startIndex..<endIndex])
+            fwrite(printedRow, 1, printedRow.count, stdout)
+            fwrite("\n", 1, 2, stdout)
+        }
+//        fwrite(restore, 1, restore.count, stdout)
+        restoreCursor()
+        fflush(stdout)
+    }
+    
+    mutating private func restoreCursor() {
+        self.renderedHeightSaved = self.renderedHeight
+        let up = EscapeSequence.cursorUp(self.renderedHeight).description
+        fwrite(up, 1, up.count, stdout)
+        self.renderedHeight = 0
+    }
+    
+    mutating func end() {
+        let down = EscapeSequence.cursorDown(self.renderedHeightSaved).description
+        fwrite(down, 1, down.count, stdout)
+        fflush(stdout)
+    }
 }
