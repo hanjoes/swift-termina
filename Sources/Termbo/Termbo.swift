@@ -186,18 +186,37 @@ struct Termbo {
         self.height = height
     }
 
-    mutating func render(bitmap: [String]) {
+    mutating func rendered(bitmap: [String]) -> String {
+        var result = ""
         for (i, row) in bitmap.enumerated() {
             if i >= height { break }
             renderedHeight += 1
             let offset = row.count > width ? width - 1 : row.count
             let endIndex = row.index(row.startIndex, offsetBy: offset)
             let printedRow = String(row[row.startIndex ..< endIndex])
-            fwrite(printedRow, 1, printedRow.count, stdout)
-            fwrite("\n", 1, 2, stdout)
+            result = result + printedRow + "\n"
         }
-        restoreCursor()
+        result = result + restoreCursor()
+        return result
+    }
+
+    mutating func render(bitmap: [String], to _: UnsafeMutablePointer<FILE>) {
+        let renderedString = rendered(bitmap: bitmap)
+        fwrite(renderedString, 1, renderedString.count, stdout)
         fflush(stdout)
+    }
+    
+    mutating func clear(_ output: UnsafeMutablePointer<FILE>) {
+        let emptyFilling = [String](repeating: String(repeating: " ", count: self.width), count: self.height)
+        render(bitmap: emptyFilling, to: output)
+    }
+
+    private mutating func restoreCursor() -> String {
+        renderedHeightSaved = renderedHeight
+        let up = EscapeSequence.cursorUp(renderedHeight).description
+        let result = up
+        renderedHeight = 0
+        return result
     }
 
     private mutating func restoreCursor() {
