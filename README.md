@@ -2,10 +2,12 @@
 
 # Termbo
 
-Terminal "character-based" rendering, driven by ANSI escape sequences.
+Terminal "character-based" rendering, driven by ANSI escape sequences. This library is free of Foundation.
 
 # Usage
 
+
+## 
 ``` swift
 var t = Termbo(width: 1, height: 1)
 let lines = ["|", "\\", "-", "/"]

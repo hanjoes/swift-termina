@@ -18,7 +18,7 @@ final class TermboTests: XCTestCase {
         }
         t.clear(stdout)
     }
-    
+
     func testSpinning() {
         var t = Termbo(width: 1, height: 1)
         let lines = ["|", "\\", "-", "/"]

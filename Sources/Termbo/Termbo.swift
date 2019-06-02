@@ -1,7 +1,7 @@
 #if os(Linux)
-import Glibc
+    import Glibc
 #else
-import Darwin
+    import Darwin
 #endif
 
 /// Escape Sequences
@@ -204,17 +204,17 @@ public struct Termbo {
         return result
     }
 
-    public mutating func render(bitmap: [String], to _: UnsafeMutablePointer<FILE>) {
+    public mutating func render(bitmap: [String], to output: UnsafeMutablePointer<FILE>) {
         let renderedString = rendered(bitmap: bitmap)
-        fwrite(renderedString, 1, renderedString.count, stdout)
+        fwrite(renderedString, 1, renderedString.count, output)
         fflush(stdout)
     }
-    
+
     public mutating func clear(_ output: UnsafeMutablePointer<FILE>) {
-        let emptyFilling = [String](repeating: String(repeating: " ", count: self.width), count: self.height)
+        let emptyFilling = [String](repeating: String(repeating: " ", count: width), count: height)
         render(bitmap: emptyFilling, to: output)
     }
-    
+
     public mutating func end() {
         let down = EscapeSequence.cursorDown(renderedHeightSaved).description
         fwrite(down, 1, down.count, stdout)
@@ -235,5 +235,4 @@ public struct Termbo {
         fwrite(up, 1, up.count, stdout)
         renderedHeight = 0
     }
-
 }
