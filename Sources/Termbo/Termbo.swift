@@ -192,13 +192,18 @@ public struct Termbo {
 
     public mutating func rendered(bitmap: [String]) -> String {
         var result = ""
+        // print("bitmap count: \(bitmap.count)")
+        
         for (i, row) in bitmap.enumerated() {
-            if i >= height { break }
-            renderedHeight += 1
-            let offset = row.count > width ? width - 1 : row.count
+            let offset = row.count > self.width ? self.width - 1 : row.count
             let endIndex = row.index(row.startIndex, offsetBy: offset)
             let printedRow = String(row[row.startIndex ..< endIndex])
-            result = result + printedRow + "\n"
+            if (i == bitmap.count - 1 || i == self.height - 1) {
+                result = result + printedRow + EscapeSequence.cursorBackward(printedRow.count).description
+            } else {
+                result = result + printedRow + "\n"
+                self.renderedHeight += 1
+            }
         }
         result = result + restoreCursor()
         return result
@@ -210,29 +215,23 @@ public struct Termbo {
         fflush(stdout)
     }
 
-    public mutating func clear(_ output: UnsafeMutablePointer<FILE>) {
-        let emptyFilling = [String](repeating: String(repeating: " ", count: width), count: height)
-        render(bitmap: emptyFilling, to: output)
-    }
-
-    public mutating func end() {
-        let down = EscapeSequence.cursorDown(renderedHeightSaved).description
-        fwrite(down, 1, down.count, stdout)
-        fflush(stdout)
+    public mutating func end(withBitmap bitmap: [String], terminator: String) {
+        for (i, row) in bitmap.enumerated() {
+            if i == bitmap.count - 1 || i == self.height - 1 {
+                print(row, terminator: terminator)
+            } else {
+                print(row)
+            }
+        }
     }
 
     private mutating func restoreCursor() -> String {
-        renderedHeightSaved = renderedHeight
-        let up = EscapeSequence.cursorUp(renderedHeight).description
-        let result = up
-        renderedHeight = 0
-        return result
-    }
-
-    private mutating func restoreCursor() {
-        renderedHeightSaved = renderedHeight
-        let up = EscapeSequence.cursorUp(renderedHeight).description
-        fwrite(up, 1, up.count, stdout)
-        renderedHeight = 0
+        self.renderedHeightSaved = self.renderedHeight
+        if self.renderedHeight > 0 {
+            let up = EscapeSequence.cursorUp(self.renderedHeight).description
+            self.renderedHeight = 0
+            return up
+        }
+        return ""
     }
 }

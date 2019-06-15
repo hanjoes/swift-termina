@@ -5,6 +5,7 @@ final class TermboTests: XCTestCase {
     func testProgressBar() {
         let totalArrows = 25
         var t = Termbo(width: totalArrows + 2, height: 4)
+        var last = [String]()
         for i in 1 ... 100 {
             var bars = [String]()
             var num = i
@@ -13,10 +14,15 @@ final class TermboTests: XCTestCase {
                 num -= totalArrows
             }
             bars.append("[\(String(repeating: ">", count: num))\(String(repeating: "-", count: totalArrows - num))]")
+            // print(bars)
+            
             t.render(bitmap: bars, to: stdout)
+            if i == 100 {
+              last = bars
+            }
             usleep(10000)
         }
-        t.clear(stdout)
+        t.end(withBitmap: last, terminator: "\n")
     }
 
     func testSpinning() {
@@ -26,11 +32,11 @@ final class TermboTests: XCTestCase {
             t.render(bitmap: [lines[i % lines.count]], to: stdout)
             usleep(10000)
         }
-        t.clear(stdout)
+        t.end(withBitmap: [""], terminator: "\n")
     }
 
     static var allTests = [
         ("testProgressBar", testProgressBar),
-        ("testSpinning", testSpinning),
+        // ("testSpinning", testSpinning),
     ]
 }
