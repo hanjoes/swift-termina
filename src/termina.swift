@@ -1,7 +1,7 @@
 #if os(Linux)
-  import Glibc
+    import Glibc
 #else
-  import Darwin
+    import Darwin
 #endif
 
 /// Escape Sequences
@@ -132,111 +132,111 @@
 /// IMPORTANT: Some of the values in the following table are not valid for all computers. Check your computer's documentation for values that are different.
 ///
 public enum EscapeSequence: CustomStringConvertible {
-  case setCursor(Int, Int)
-  case cursorUp(Int)
-  case cursorDown(Int)
-  case cursorForward(Int)
-  case cursorBackward(Int)
-  case saveCursor
-  case restoreCursor
-  case eraseDisplay
-  case eraseLine
-  case graphicsModeOn([Int])
-  case setMode(Int)
-  case resetMode(Int)
-  case setKeyboardString([(Int, String)])
+    case setCursor(Int, Int)
+    case cursorUp(Int)
+    case cursorDown(Int)
+    case cursorForward(Int)
+    case cursorBackward(Int)
+    case saveCursor
+    case restoreCursor
+    case eraseDisplay
+    case eraseLine
+    case graphicsModeOn([Int])
+    case setMode(Int)
+    case resetMode(Int)
+    case setKeyboardString([(Int, String)])
 
-  public var description: String {
-    switch self {
-    case let .setCursor(line, col):
-      return "\u{1b}[\(line);\(col)H"
-    case let .cursorUp(value):
-      return "\u{1b}[\(value)A"
-    case let .cursorDown(value):
-      return "\u{1b}[\(value)B"
-    case let .cursorForward(value):
-      return "\u{1b}[\(value)C"
-    case let .cursorBackward(value):
-      return "\u{1b}[\(value)D"
-    case .saveCursor:
-      return "\u{1b}[s"
-    case .restoreCursor:
-      return "\u{1b}[u"
-    case .eraseDisplay:
-      return "\u{1b}[2J"
-    case .eraseLine:
-      return "\u{1b}[K"
-    case let .graphicsModeOn(values):
-      return "\u{1b}[\(values.map { String($0) }.joined(separator: ";"))m"
-    case let .setMode(value):
-      return "\u{1b}[=\(value)h"
-    case let .resetMode(value):
-      return "\u{1b}[=\(value)l"
-    case let .setKeyboardString(mappings):
-      return "\u{1b}[\(mappings.map { "\($0.0);\($0.1)" }.joined(separator: ";"))p"
+    public var description: String {
+        switch self {
+        case let .setCursor(line, col):
+            return "\u{1b}[\(line);\(col)H"
+        case let .cursorUp(value):
+            return "\u{1b}[\(value)A"
+        case let .cursorDown(value):
+            return "\u{1b}[\(value)B"
+        case let .cursorForward(value):
+            return "\u{1b}[\(value)C"
+        case let .cursorBackward(value):
+            return "\u{1b}[\(value)D"
+        case .saveCursor:
+            return "\u{1b}[s"
+        case .restoreCursor:
+            return "\u{1b}[u"
+        case .eraseDisplay:
+            return "\u{1b}[2J"
+        case .eraseLine:
+            return "\u{1b}[K"
+        case let .graphicsModeOn(values):
+            return "\u{1b}[\(values.map { String($0) }.joined(separator: ";"))m"
+        case let .setMode(value):
+            return "\u{1b}[=\(value)h"
+        case let .resetMode(value):
+            return "\u{1b}[=\(value)l"
+        case let .setKeyboardString(mappings):
+            return "\u{1b}[\(mappings.map { "\($0.0);\($0.1)" }.joined(separator: ";"))p"
+        }
     }
-  }
 }
 
-public struct Termbo {
-  private let width: Int
-  private let height: Int
+public struct Termina {
+    private let width: Int
+    private let height: Int
 
-  private var renderedHeightSaved: Int = 0
-  private var renderedHeight: Int = 0
+    private var renderedHeightSaved: Int = 0
+    private var renderedHeight: Int = 0
 
-  public init(width: Int, height: Int) {
-    self.width = width
-    self.height = height
-  }
-
-  public mutating func rendered(bitmap: [String]) -> String {
-    var result = ""
-    // print("bitmap count: \(bitmap.count)")
-
-    for (i, row) in bitmap.enumerated() {
-      let offset = row.count > width ? width - 1 : row.count
-      let endIndex = row.index(row.startIndex, offsetBy: offset)
-      let printedRow = String(row[row.startIndex ..< endIndex])
-      if i == bitmap.count - 1 || i == height - 1 {
-        result = result + printedRow
-          + EscapeSequence.cursorBackward(printedRow.count).description
-      } else {
-        result = result + printedRow + "\n"
-        renderedHeight += 1
-      }
+    public init(width: Int, height: Int) {
+        self.width = width
+        self.height = height
     }
-    result = result + restoreCursor()
-    return result
-  }
 
-  public mutating func render(bitmap: [String],
-                              to output: UnsafeMutablePointer<FILE>) {
-    let renderedString = rendered(bitmap: bitmap)
-    fwrite(renderedString, 1, renderedString.count, output)
-    fflush(stdout)
-  }
+    public mutating func rendered(bitmap: [String]) -> String {
+        var result = ""
+        // print("bitmap count: \(bitmap.count)")
 
-  public mutating func end(withBitmap bitmap: [String], terminator: String,
-                           to output: UnsafeMutablePointer<FILE>) {
-    for (i, row) in bitmap.enumerated() {
-      if i == bitmap.count - 1 || i == height - 1 {
-        fwrite(row + terminator, 1, row.count + terminator.count,
-               output)
-      } else {
-        fwrite(row + "\n", 1, row.count + 1, output)
-      }
-      fflush(output)
+        for (i, row) in bitmap.enumerated() {
+            let offset = row.count > width ? width - 1 : row.count
+            let endIndex = row.index(row.startIndex, offsetBy: offset)
+            let printedRow = String(row[row.startIndex ..< endIndex])
+            if i == bitmap.count - 1 || i == height - 1 {
+                result = result + printedRow
+                    + EscapeSequence.cursorBackward(printedRow.count).description
+            } else {
+                result = result + printedRow + "\n"
+                renderedHeight += 1
+            }
+        }
+        result = result + restoreCursor()
+        return result
     }
-  }
 
-  private mutating func restoreCursor() -> String {
-    renderedHeightSaved = renderedHeight
-    if renderedHeight > 0 {
-      let up = EscapeSequence.cursorUp(renderedHeight).description
-      renderedHeight = 0
-      return up
+    public mutating func render(bitmap: [String],
+                                to output: UnsafeMutablePointer<FILE>) {
+        let renderedString = rendered(bitmap: bitmap)
+        fwrite(renderedString, 1, renderedString.count, output)
+        fflush(stdout)
     }
-    return ""
-  }
+
+    public mutating func end(withBitmap bitmap: [String], terminator: String,
+                             to output: UnsafeMutablePointer<FILE>) {
+        for (i, row) in bitmap.enumerated() {
+            if i == bitmap.count - 1 || i == height - 1 {
+                fwrite(row + terminator, 1, row.count + terminator.count,
+                       output)
+            } else {
+                fwrite(row + "\n", 1, row.count + 1, output)
+            }
+            fflush(output)
+        }
+    }
+
+    private mutating func restoreCursor() -> String {
+        renderedHeightSaved = renderedHeight
+        if renderedHeight > 0 {
+            let up = EscapeSequence.cursorUp(renderedHeight).description
+            renderedHeight = 0
+            return up
+        }
+        return ""
+    }
 }
