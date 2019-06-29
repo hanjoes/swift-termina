@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/hanjoes/Termbo.svg?branch=master)](https://travis-ci.org/hanjoes/Termbo)
 
-# Termbo
+# Termina
 
 Terminal "character-based" rendering, driven by ANSI escape sequences. This library is free of Foundation.
 
