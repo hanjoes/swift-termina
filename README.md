@@ -6,10 +6,10 @@ Terminal "character-based" rendering, driven by ANSI escape sequences. This libr
 
 # Usage
 
-
 ## 
 ``` swift
-var t = Termbo(width: 1, height: 1)
+import TerminaLib
+var t = Termina(width: 1, height: 1)
 let lines = ["|", "\\", "-", "/"]
 for i in 1 ... 100 {
     t.render(bitmap: [lines[i % lines.count]], to: stdout)
