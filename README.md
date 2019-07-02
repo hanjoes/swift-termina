@@ -6,7 +6,6 @@ Terminal "character-based" rendering, driven by ANSI escape sequences. This libr
 
 # Usage
 
-## 
 ``` swift
 import TerminaLib
 var t = Termina(width: 1, height: 1)
